@@ -76,7 +76,6 @@ export default async function handler(req, res) {
         Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Do not include markdown wrappers.
         `;
 
-        // FIXED: Upgraded to Gemini 3.5 Flash because the 1.5 series was deprecated and shut down
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -92,6 +91,19 @@ export default async function handler(req, res) {
         const rawData = await response.json();
 
         if (rawData.error) {
+            // INTERCEPTOR: Catch rate limits cleanly and format them into a beautiful customer warning
+            const errMsg = rawData.error.message || '';
+            const isQuotaOrRateLimit = errMsg.toLowerCase().includes('quota') || 
+                                       errMsg.toLowerCase().includes('rate limit') || 
+                                       rawData.error.code === 429;
+            
+            if (isQuotaOrRateLimit) {
+                return res.status(200).json({ 
+                    error: true, 
+                    message: "Whoa there! Our free servers are currently cooling down from too many rapid searches. Please wait 60 seconds and click Compare again! ☕" 
+                });
+            }
+
             return res.status(200).json({ 
                 error: true, 
                 message: `Gemini API Error: ${rawData.error.message}` 
