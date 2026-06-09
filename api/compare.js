@@ -1,6 +1,6 @@
 // api/compare.js
 export default async function handler(req, res) {
-    // Enable CORS for smooth browser communication
+    // Enable CORS headers so your browser doesn't block the request
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -10,7 +10,10 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
-    const { query, category } = req.query;
+    // Safely extract parameters using modern URL parsing
+    const { searchParams } = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    const query = searchParams.get('query');
+    const category = searchParams.get('category');
 
     if (!query) {
         return res.status(200).json({ error: true, message: 'Query parameter is required' });
@@ -73,7 +76,6 @@ export default async function handler(req, res) {
         Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Do not include markdown wrappers.
         `;
 
-        // FIXED: Using the accurate 'gemini-1.5-flash-latest' string which is fully supported on the v1beta endpoint
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
