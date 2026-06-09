@@ -1,6 +1,6 @@
 // api/compare.js
 export default async function handler(req, res) {
-    // Enable CORS to ensure smooth browser communication
+    // Enable CORS for smooth browser communication
     res.setHeader('Access-Control-Allow-Credentials', true);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
@@ -70,11 +70,11 @@ export default async function handler(req, res) {
             "reason": "Clear explanation citing current market pricing and reviews"
           }
         }
-        Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Avoid markdown wrappers.
+        Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Do not include any markdown backticks.
         `;
 
-        // FIXED: Switched endpoint to use the correct v1/models stable structure
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+        // FIXED: Using v1beta endpoint with standard model path to safely support tools and json config structure
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
