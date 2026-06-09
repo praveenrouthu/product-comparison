@@ -1,136 +1,118 @@
 // api/compare.js
 export default async function handler(req, res) {
-    const { query } = req.query; 
+    // Enable CORS to ensure smooth browser communication
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+    res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
+    const { query, category } = req.query;
 
     if (!query) {
         return res.status(400).json({ error: 'Query parameter is required' });
     }
 
+    const API_KEY = process.env.GEMINI_API_KEY;
+    if (!API_KEY) {
+        return res.status(200).json({ 
+            error: true, 
+            message: 'API Key missing in Vercel Environment Variables.' 
+        });
+    }
+
     try {
         const productName = decodeURIComponent(query);
         
-        // Base price calculation to make mock data feel realistic relative to each other
-        const basePriceNum = Math.floor(Math.random() * 40000) + 5000;
+        // We strictly instruct the model to execute a live web search first
+        const prompt = `
+        You are an expert product analyst for the Indian market.
+        First, use your Google Search tool to find the current live retail prices, customer reviews, and top 4 active competing alternatives available in India right now for: "${productName}" (Category: ${category || 'General'}).
+        
+        Based on your real-time search results, populate and return a valid JSON response matching this exact structure. 
+        Do not estimate or use outdated pricing—extract exact live values from the current web results. Use current Indian Rupee (₹) structures.
 
-        // Function to format Indian Currency easily
-        const formatINR = (num) => `₹${num.toLocaleString('en-IN')}`;
+        {
+          "inputProduct": {
+            "name": "Full Product Name",
+            "brand": "Brand",
+            "price": "₹XX,XXX",
+            "priceNum": 0,
+            "reviewScore": 4.5,
+            "valueForMoney": 85,
+            "qualityBuild": 80,
+            "effectiveness": 90,
+            "popularity": 88,
+            "bestFor": "Target audience layout",
+            "warranty": "e.g., 1 Year Brand Warranty",
+            "verdict": "Short summary based on live store availability"
+          },
+          "alternatives": [
+            {
+              "name": "Live Competitor Name 1",
+              "brand": "Brand",
+              "price": "₹XX,XXX",
+              "priceNum": 0,
+              "reviewScore": 4.2,
+              "valueForMoney": 80,
+              "qualityBuild": 85,
+              "effectiveness": 85,
+              "popularity": 80,
+              "bestFor": "...",
+              "warranty": "...",
+              "verdict": "..."
+            }
+          ],
+          "winner": {
+            "name": "Name of best product out of all 5 choices calculated from live values",
+            "reason": "Clear explanation citing current market pricing and reviews"
+          }
+        }
+        Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Avoid markdown wrappers.
+        `;
 
-        const comparisonData = {
-            inputProduct: {
-                name: productName,
-                brand: "Target Brand",
-                category: "General",
-                price: formatINR(basePriceNum),
-                priceNum: basePriceNum,
-                reviewScore: 4.2,
-                valueForMoney: 82,
-                qualityBuild: 85,
-                effectiveness: 80,
-                popularity: 88,
-                pros: ["Well known", "Good support"],
-                cons: ["Can be pricey"],
-                bestFor: "General use",
-                verdict: "A solid choice but facing tough competition.",
-                warranty: "1 Year",
-                availability: "Widely available",
-                ecoFriendly: true,
-                yearLaunched: 2024
-            },
-            alternatives: [
-                {
-                    name: `${productName} Pro Max`,
-                    brand: "Premium Tier",
-                    price: formatINR(basePriceNum + 15000),
-                    priceNum: basePriceNum + 15000,
-                    reviewScore: 4.8,
-                    valueForMoney: 75,
-                    qualityBuild: 95,
-                    effectiveness: 98,
-                    popularity: 90,
-                    bestFor: "Power users",
-                    verdict: "Top tier performance if budget is no issue.",
-                    warranty: "2 Years",
-                    ecoFriendly: false,
-                    yearLaunched: 2024
-                },
-                {
-                    name: `Alpha Alternative`,
-                    brand: "Market Challenger",
-                    price: formatINR(basePriceNum - 4000),
-                    priceNum: basePriceNum - 4000,
-                    reviewScore: 4.5,
-                    valueForMoney: 92,
-                    qualityBuild: 88,
-                    effectiveness: 85,
-                    popularity: 95,
-                    bestFor: "Value hunters",
-                    verdict: "Offers 90% of the features for a fraction of the cost.",
-                    warranty: "1 Year",
-                    ecoFriendly: true,
-                    yearLaunched: 2023
-                },
-                {
-                    name: `Zeta Budget Edition`,
-                    brand: "Budget Tier",
-                    price: formatINR(basePriceNum - 8000),
-                    priceNum: basePriceNum - 8000,
-                    reviewScore: 3.8,
-                    valueForMoney: 95,
-                    qualityBuild: 70,
-                    effectiveness: 75,
-                    popularity: 80,
-                    bestFor: "Tight budgets",
-                    verdict: "Great entry-level option, but compromises on build.",
-                    warranty: "6 Months",
-                    ecoFriendly: false,
-                    yearLaunched: 2023
-                },
-                {
-                    name: `Omega Classic`,
-                    brand: "Legacy Brand",
-                    price: formatINR(basePriceNum + 2000),
-                    priceNum: basePriceNum + 2000,
-                    reviewScore: 4.0,
-                    valueForMoney: 80,
-                    qualityBuild: 90,
-                    effectiveness: 78,
-                    popularity: 85,
-                    bestFor: "Brand loyalists",
-                    verdict: "Reliable and sturdy, though slightly outdated tech.",
-                    warranty: "1 Year",
-                    ecoFriendly: false,
-                    yearLaunched: 2022
-                },
-                {
-                    name: `EcoSmart Alternative`,
-                    brand: "Green Tech",
-                    price: formatINR(basePriceNum + 5000),
-                    priceNum: basePriceNum + 5000,
-                    reviewScore: 4.3,
-                    valueForMoney: 85,
-                    qualityBuild: 82,
-                    effectiveness: 88,
-                    popularity: 75,
-                    bestFor: "Eco-conscious buyers",
-                    verdict: "Sustainable materials with minimal performance drop.",
-                    warranty: "1.5 Years",
-                    ecoFriendly: true,
-                    yearLaunched: 2024
-                }
-            ],
-            winner: {
-                name: "Alpha Alternative",
-                reason: "Provides the best balance of features, high build quality, and an aggressive price point for the Indian market."
-            },
-            category: "General",
-            avgPrice: formatINR(basePriceNum + 2000),
-            insight: "The market is leaning heavily towards high value-for-money alternatives."
-        };
+        // Fetch using the REST API configuration
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                tools: [{ googleSearch: {} }], // <-- THIS IS THE MAGIC LINE: Activates live Google web browsing
+                generationConfig: { 
+                    response_mime_type: "application/json"
+                } 
+            })
+        });
 
-        return res.status(200).json(comparisonData);
+        const rawData = await response.json();
+
+        if (rawData.error) {
+            return res.status(200).json({ 
+                error: true, 
+                message: `Gemini API Error: ${rawData.error.message}` 
+            });
+        }
+
+        if (!rawData.candidates || !rawData.candidates[0]?.content?.parts?.[0]?.text) {
+            return res.status(200).json({ 
+                error: true, 
+                message: 'AI live search was empty or blocked by temporary safety constraints. Try another item.' 
+            });
+        }
+        
+        const aiText = rawData.candidates[0].content.parts[0].text;
+        const finalJson = JSON.parse(aiText);
+
+        return res.status(200).json(finalJson);
 
     } catch (error) {
-        console.error("API Error:", error);
-        return res.status(500).json({ error: 'Failed to process Indian market data' });
+        console.error("Server Error:", error);
+        return res.status(200).json({ 
+            error: true, 
+            message: `Server Error: ${error.message}` 
+        });
     }
 }
