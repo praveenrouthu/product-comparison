@@ -76,7 +76,8 @@ export default async function handler(req, res) {
         Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Do not include markdown wrappers.
         `;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
+        // FIXED: Upgraded to Gemini 3.5 Flash because the 1.5 series was deprecated and shut down
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
