@@ -70,11 +70,11 @@ export default async function handler(req, res) {
             "reason": "Clear explanation citing current market pricing and reviews"
           }
         }
-        Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Do not include any markdown backticks.
+        Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Do not include markdown wrappers.
         `;
 
-        // FIXED: Using v1beta endpoint with standard model path to safely support tools and json config structure
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+        // FIXED: Using the accurate 'gemini-1.5-flash-latest' string which is fully supported on the v1beta endpoint
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
