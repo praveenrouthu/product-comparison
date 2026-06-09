@@ -1,6 +1,5 @@
 // api/compare.js
 export default async function handler(req, res) {
-    // 1. Grab the product name the user typed in the frontend search box
     const { query } = req.query; 
 
     if (!query) {
@@ -8,62 +7,130 @@ export default async function handler(req, res) {
     }
 
     try {
-        // 2. Fetch real-time market product options from an open data service
-        // For demonstration, we use a robust mock database generator structured exactly like an enterprise e-commerce payload
-        const formattedQuery = decodeURIComponent(query).toLowerCase();
+        const productName = decodeURIComponent(query);
         
-        // Generate real-time responsive data points matching the user's specific query
-        const mockMarketDatabase = [
-            {
-                title: `${query} (Premium Edition)`,
-                price: (Math.random() * 50 + 80).toFixed(2),
-                rating: 5,
-                effects: "Maximum performance, highly durable architecture",
-                valueForMoney: "Excellent investment",
-                inStock: true
-            },
-            {
-                title: `${query} Standard Elite`,
-                price: (Math.random() * 40 + 50).toFixed(2),
-                rating: 4,
-                effects: "Balanced optimization, stable output framework",
-                valueForMoney: "Market baseline standard",
-                inStock: true
-            },
-            {
-                title: `Alpha Alternative Pro`,
-                price: (Math.random() * 30 + 40).toFixed(2),
-                rating: 4,
-                effects: "Fast processing speeds, lightweight form factor",
-                valueForMoney: "High value alternative",
-                inStock: true
-            },
-            {
-                title: `Zeta Budget Competitor`,
-                price: (Math.random() * 20 + 20).toFixed(2),
-                rating: 3,
-                effects: "Basic functionality, functional dependency layer",
-                valueForMoney: "Highly affordable choice",
-                inStock: false
-            },
-            {
-                title: `Omega Overpriced Legacy`,
-                price: (Math.random() * 100 + 120).toFixed(2),
-                rating: 3,
-                effects: "Branded traditional build, complex manual upkeep",
-                valueForMoney: "Low value per dollar",
-                inStock: true
-            }
-        ];
+        // Base price calculation to make mock data feel realistic relative to each other
+        const basePriceNum = Math.floor(Math.random() * 40000) + 5000;
 
-        // Sort by price low-to-high to give a comprehensive real-time view
-        const sortedProducts = mockMarketDatabase.sort((a, b) => a.price - b.price);
+        // Function to format Indian Currency easily
+        const formatINR = (num) => `₹${num.toLocaleString('en-IN')}`;
 
-        // 3. Return the array cleanly back to the client index.html file
-        return res.status(200).json(sortedProducts);
+        const comparisonData = {
+            inputProduct: {
+                name: productName,
+                brand: "Target Brand",
+                category: "General",
+                price: formatINR(basePriceNum),
+                priceNum: basePriceNum,
+                reviewScore: 4.2,
+                valueForMoney: 82,
+                qualityBuild: 85,
+                effectiveness: 80,
+                popularity: 88,
+                pros: ["Well known", "Good support"],
+                cons: ["Can be pricey"],
+                bestFor: "General use",
+                verdict: "A solid choice but facing tough competition.",
+                warranty: "1 Year",
+                availability: "Widely available",
+                ecoFriendly: true,
+                yearLaunched: 2024
+            },
+            alternatives: [
+                {
+                    name: `${productName} Pro Max`,
+                    brand: "Premium Tier",
+                    price: formatINR(basePriceNum + 15000),
+                    priceNum: basePriceNum + 15000,
+                    reviewScore: 4.8,
+                    valueForMoney: 75,
+                    qualityBuild: 95,
+                    effectiveness: 98,
+                    popularity: 90,
+                    bestFor: "Power users",
+                    verdict: "Top tier performance if budget is no issue.",
+                    warranty: "2 Years",
+                    ecoFriendly: false,
+                    yearLaunched: 2024
+                },
+                {
+                    name: `Alpha Alternative`,
+                    brand: "Market Challenger",
+                    price: formatINR(basePriceNum - 4000),
+                    priceNum: basePriceNum - 4000,
+                    reviewScore: 4.5,
+                    valueForMoney: 92,
+                    qualityBuild: 88,
+                    effectiveness: 85,
+                    popularity: 95,
+                    bestFor: "Value hunters",
+                    verdict: "Offers 90% of the features for a fraction of the cost.",
+                    warranty: "1 Year",
+                    ecoFriendly: true,
+                    yearLaunched: 2023
+                },
+                {
+                    name: `Zeta Budget Edition`,
+                    brand: "Budget Tier",
+                    price: formatINR(basePriceNum - 8000),
+                    priceNum: basePriceNum - 8000,
+                    reviewScore: 3.8,
+                    valueForMoney: 95,
+                    qualityBuild: 70,
+                    effectiveness: 75,
+                    popularity: 80,
+                    bestFor: "Tight budgets",
+                    verdict: "Great entry-level option, but compromises on build.",
+                    warranty: "6 Months",
+                    ecoFriendly: false,
+                    yearLaunched: 2023
+                },
+                {
+                    name: `Omega Classic`,
+                    brand: "Legacy Brand",
+                    price: formatINR(basePriceNum + 2000),
+                    priceNum: basePriceNum + 2000,
+                    reviewScore: 4.0,
+                    valueForMoney: 80,
+                    qualityBuild: 90,
+                    effectiveness: 78,
+                    popularity: 85,
+                    bestFor: "Brand loyalists",
+                    verdict: "Reliable and sturdy, though slightly outdated tech.",
+                    warranty: "1 Year",
+                    ecoFriendly: false,
+                    yearLaunched: 2022
+                },
+                {
+                    name: `EcoSmart Alternative`,
+                    brand: "Green Tech",
+                    price: formatINR(basePriceNum + 5000),
+                    priceNum: basePriceNum + 5000,
+                    reviewScore: 4.3,
+                    valueForMoney: 85,
+                    qualityBuild: 82,
+                    effectiveness: 88,
+                    popularity: 75,
+                    bestFor: "Eco-conscious buyers",
+                    verdict: "Sustainable materials with minimal performance drop.",
+                    warranty: "1.5 Years",
+                    ecoFriendly: true,
+                    yearLaunched: 2024
+                }
+            ],
+            winner: {
+                name: "Alpha Alternative",
+                reason: "Provides the best balance of features, high build quality, and an aggressive price point for the Indian market."
+            },
+            category: "General",
+            avgPrice: formatINR(basePriceNum + 2000),
+            insight: "The market is leaning heavily towards high value-for-money alternatives."
+        };
+
+        return res.status(200).json(comparisonData);
 
     } catch (error) {
-        console.error("API Processing Error:", error);
-        return res.status(500).json({ error: 'Internal Server Error fetching live data' });
+        console.error("API Error:", error);
+        return res.status(500).json({ error: 'Failed to process Indian market data' });
     }
 }
