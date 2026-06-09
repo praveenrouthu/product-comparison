@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Product Comparison Dashboard</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #f8f9fa; 
+            color: #333; 
+            padding: 2rem; 
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .search-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 1px solid #e1e4e8;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+            max-width: 600px;
+            margin: 1.5rem auto 0 auto;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 0.8rem 1rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .search-box button {
+            padding: 0.8rem 1.5rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-box button:hover {
+            background-color: #0056b3;
+        }
+
+        .comparison-container { 
+            display: flex; 
+            overflow-x: auto; 
+            gap: 1.5rem; 
+            padding-bottom: 1rem; 
+            align-items: flex-start;
+            min-height: 300px;
+        }
+
+        .product-card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 1.5rem; 
+            min-width: 280px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            border: 1px solid #e1e4e8; 
+            flex: 1; 
+            transition: all 0.3s ease;
+            opacity: 1;
+        }
+
+        .product-card.loading {
+            opacity: 0.6;
+            filter: blur(1px);
+        }
+
+        .product-card.primary { 
+            border: 2px solid #007bff; 
+            box-shadow: 0 8px 16px rgba(0,123,255,0.15); 
+        }
+
+        .badge { 
+            background: #007bff; 
+            color: white; 
+            padding: 0.3rem 0.8rem; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            font-weight: bold;
+            margin-bottom: 1rem; 
+            display: inline-block; 
+        }
+
+        .price { 
+            font-size: 1.8rem; 
+            font-weight: bold; 
+            color: #2c3e50; 
+            margin: 1rem 0; 
+        }
+
+        .feature-list { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+        }
+
+        .feature-list li { 
+            padding: 0.8rem 0; 
+            border-bottom: 1px solid #eee; 
+            font-size: 0.95rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+        }
+
+        .feature-list li:last-child { border-bottom: none; }
+        .feature-name { color: #6c757d; font-weight: 500; }
+        .stars { color: #f39c12; letter-spacing: 1px; }
+
+        .status-message {
+            width: 100%;
+            text-align: center;
+            color: #6c757d;
+            font-size: 1.1rem;
+            padding: 3rem 0;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 0.8rem;
+            margin-top: 1.5rem;
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .primary .action-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="search-section">
+        <h2>Real-Time Product Comparison</h2>
+        <p>Enter a product name to instantly pull live pricing, ratings, and details against top alternatives.</p>
+        <div class="search-box">
+            <input type="text" id="productQuery" placeholder="e.g., Sony WH-1000XM4, Whey Protein, Mechanical Keyboard...">
+            <button id="searchBtn">Compare Live</button>
+        </div>
+    </div>
+    
+    <div class="comparison-container" id="comparisonGrid">
+        <div class="status-message">Type a product above to initialize real-time market comparison.</div>
+    </div>
+
+    <script>
+        document.getElementById('searchBtn').addEventListener('click', executeComparison);
+        document.getElementById('productQuery').addEventListener('keypress', function(e) {
+            if (e.key === 'key') executeComparison();
+        });
+
+        async function executeComparison() {
+            const queryInput = document.getElementById('productQuery');
+            const grid = document.getElementById('comparisonGrid');
+            const query = queryInput.value.trim();
+
+            if (!query) {
+                alert('Please enter a valid product name.');
+                return;
+            }
+
+            // 1. Establish visual loading state
+            grid.innerHTML = '<div class="status-message">Fetching real-time updates from market APIs...</div>';
+
+            try {
+                // 2. Call your Vercel serverless API route
+                const response = await fetch(`/api/compare?query=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) {
+                    throw new Error('Network response experienced anomalies.');
+                }
+
+                const products = await response.json();
+
+                if (!products || products.length === 0) {
+                    grid.innerHTML = '<div class="status-message">No matching product distributions found. Try a different term.</div>';
+                    return;
+                }
+
+                // 3. Clear the grid to prepare for UI rendering
+                grid.innerHTML = '';
+
+                // 4. Iterate over parsed API data points to construct the matrix elements
+                products.forEach((product, index) => {
+                    const isPrimary = index === 0; // The first item acts as the baseline target
+                    const card = document.createElement('div');
+                    card.className = `product-card ${isPrimary ? 'primary' : ''}`;
+
+                    // Convert numeric ratings cleanly to a standard visual star presentation
+                    const visualStars = '★'.repeat(Math.round(product.rating || 5)) + '☆'.repeat(5 - Math.round(product.rating || 5));
+
+                    card.innerHTML = `
+                        ${isPrimary ? '<span class="badge">Target Product</span>' : ''}
+                        <h3>${product.title || 'Alternative Choice'}</h3>
+                        <div class="price">$${product.price || 'N/A'}</div>
+                        <ul class="feature-list">
+                            <li><span class="feature-name">Reviews</span> <span class="stars">${visualStars}</span></li>
+                            <li><span class="feature-name">Primary Effects</span> <span>${product.effects || 'Standard Performance'}</span></li>
+                            <li><span class="feature-name">Value Index</span> <span>${product.valueForMoney || 'Market Baseline'}</span></li>
+                            <li><span class="feature-name">Availability</span> <span>${product.inStock ? 'In Stock' : 'Limited'}</span></li>
+                        </ul>
+                        <button class="action-btn">${isPrimary ? 'Buy Target Option' : 'View Alternative'}</button>
+                    `;
+                    
+                    grid.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error('Comparison Error:', error);
+                grid.innerHTML = '<div class="status-message" style="color: #dc3545;">Failed to load live data. Please check connection and try again.</div>';
+            }
+        }
+    </script>
+</body>
+</html>
