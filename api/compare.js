@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const { query, category } = req.query;
 
     if (!query) {
-        return res.status(400).json({ error: 'Query parameter is required' });
+        return res.status(200).json({ error: true, message: 'Query parameter is required' });
     }
 
     const API_KEY = process.env.GEMINI_API_KEY;
@@ -27,7 +27,6 @@ export default async function handler(req, res) {
     try {
         const productName = decodeURIComponent(query);
         
-        // We strictly instruct the model to execute a live web search first
         const prompt = `
         You are an expert product analyst for the Indian market.
         First, use your Google Search tool to find the current live retail prices, customer reviews, and top 4 active competing alternatives available in India right now for: "${productName}" (Category: ${category || 'General'}).
@@ -67,20 +66,19 @@ export default async function handler(req, res) {
             }
           ],
           "winner": {
-            "name": "Name of best product out of all 5 choices calculated from live values",
+            "name": "Name of best product out of all choices calculated from live values",
             "reason": "Clear explanation citing current market pricing and reviews"
           }
         }
         Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Avoid markdown wrappers.
         `;
 
-        // Fetch using the REST API configuration
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                tools: [{ googleSearch: {} }], // <-- THIS IS THE MAGIC LINE: Activates live Google web browsing
+                tools: [{ google_search: {} }], // <-- FIXED: Changed to snake_case for direct REST calls
                 generationConfig: { 
                     response_mime_type: "application/json"
                 } 
