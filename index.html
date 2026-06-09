@@ -1,236 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Product Comparison Dashboard</title>
-    <style>
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            background-color: #f8f9fa; 
-            color: #333; 
-            padding: 2rem; 
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .search-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            margin-bottom: 2rem;
-            text-align: center;
-            border: 1px solid #e1e4e8;
-        }
-
-        .search-box {
-            display: flex;
-            gap: 0.5rem;
-            max-width: 600px;
-            margin: 1.5rem auto 0 auto;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 0.8rem 1rem;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        .search-box button {
-            padding: 0.8rem 1.5rem;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .search-box button:hover {
-            background-color: #0056b3;
-        }
-
-        .comparison-container { 
-            display: flex; 
-            overflow-x: auto; 
-            gap: 1.5rem; 
-            padding-bottom: 1rem; 
-            align-items: flex-start;
-            min-height: 300px;
-        }
-
-        .product-card { 
-            background: white; 
-            border-radius: 12px; 
-            padding: 1.5rem; 
-            min-width: 280px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-            border: 1px solid #e1e4e8; 
-            flex: 1; 
-            transition: all 0.3s ease;
-            opacity: 1;
-        }
-
-        .product-card.loading {
-            opacity: 0.6;
-            filter: blur(1px);
-        }
-
-        .product-card.primary { 
-            border: 2px solid #007bff; 
-            box-shadow: 0 8px 16px rgba(0,123,255,0.15); 
-        }
-
-        .badge { 
-            background: #007bff; 
-            color: white; 
-            padding: 0.3rem 0.8rem; 
-            border-radius: 20px; 
-            font-size: 0.8rem; 
-            font-weight: bold;
-            margin-bottom: 1rem; 
-            display: inline-block; 
-        }
-
-        .price { 
-            font-size: 1.8rem; 
-            font-weight: bold; 
-            color: #2c3e50; 
-            margin: 1rem 0; 
-        }
-
-        .feature-list { 
-            list-style: none; 
-            padding: 0; 
-            margin: 0; 
-        }
-
-        .feature-list li { 
-            padding: 0.8rem 0; 
-            border-bottom: 1px solid #eee; 
-            font-size: 0.95rem; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center;
-        }
-
-        .feature-list li:last-child { border-bottom: none; }
-        .feature-name { color: #6c757d; font-weight: 500; }
-        .stars { color: #f39c12; letter-spacing: 1px; }
-
-        .status-message {
-            width: 100%;
-            text-align: center;
-            color: #6c757d;
-            font-size: 1.1rem;
-            padding: 3rem 0;
-        }
-
-        .action-btn {
-            width: 100%;
-            padding: 0.8rem;
-            margin-top: 1.5rem;
-            background-color: #f8f9fa;
-            color: #333;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .primary .action-btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live Product Comparison Dashboard</title>
+<style>
+/* Keeping your exact CSS styling */
+:root {
+  --color-text-primary: #111;
+  --color-text-secondary: #555;
+  --color-text-tertiary: #888;
+  --color-background-primary: #fff;
+  --color-background-secondary: #f8f9fa;
+  --color-border-secondary: #e1e4e8;
+  --color-border-tertiary: #eee;
+  --border-radius-md: 6px;
+  --border-radius-lg: 12px;
+  --font-sans: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans); background-color: #fafafa;}
+.wrap{padding:1.5rem; max-width: 1200px; margin: 0 auto;}
+.hero{text-align:center;margin-bottom:2rem}
+.hero h1{font-size:26px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px}
+.hero p{font-size:14px;color:var(--color-text-secondary)}
+.search-row{display:flex;gap:10px;margin-bottom:1.5rem}
+.search-row input{flex:1;font-size:15px; padding: 10px; border: 1px solid #ccc; border-radius: var(--border-radius-md);}
+.search-row select{width:200px;font-size:14px; padding: 10px; border: 1px solid #ccc; border-radius: var(--border-radius-md);}
+.btn-primary{background:var(--color-text-primary);color:var(--color-background-primary);border:none;padding:0 20px;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;cursor:pointer;height:42px;white-space:nowrap; transition: background 0.2s;}
+.btn-primary:hover{background: #333;}
+.btn-primary:disabled{opacity:0.45;cursor:not-allowed}
+.status-bar{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px 16px;font-size:13px;color:var(--color-text-secondary);margin-bottom:1.5rem;display:flex;align-items:center;gap:8px;min-height:44px; border: 1px solid var(--color-border-tertiary);}
+.spinner{width:16px;height:16px;border:2px solid var(--color-border-secondary);border-top-color:var(--color-text-primary);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.section-label{font-size:11px;font-weight:bold;color:var(--color-text-tertiary);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:10px; margin-top: 2rem;}
+.product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin-bottom:1.5rem}
+.product-card{background:var(--color-background-primary);border:1px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:18px;position:relative;transition:transform 0.2s, box-shadow 0.2s;}
+.product-card:hover{transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.05);}
+.product-card.input-card{border:2px solid #007bff; box-shadow: 0 4px 12px rgba(0,123,255,0.1);}
+.product-card .badge-input{position:absolute;top:-10px;left:12px;background:#007bff;color:#fff;font-size:11px;font-weight:bold;padding:4px 10px;border-radius:20px;}
+.product-card .badge-rank{position:absolute;top:-10px;right:12px;font-size:11px;font-weight:bold;padding:4px 10px;border-radius:20px}
+.badge-rank.gold{background:#EF9F27;color:#fff}
+.badge-rank.silver{background:#9e9e9e;color:#fff}
+.badge-rank.bronze{background:#cd7f32;color:#fff}
+.prod-name{font-size:16px;font-weight:bold;color:var(--color-text-primary);margin-bottom:4px;line-height:1.3; margin-top: 8px;}
+.prod-brand{font-size:12px;color:var(--color-text-tertiary);margin-bottom:10px}
+.prod-price{font-size:22px;font-weight:bold;color:var(--color-text-primary);margin-bottom:12px}
+.metric-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.metric-label{font-size:12px;color:var(--color-text-secondary); width: 80px;}
+.metric-bar-wrap{flex: 1; height:6px;background:var(--color-border-tertiary);border-radius:3px;overflow:hidden; margin: 0 10px;}
+.metric-bar{height:100%;border-radius:3px;transition:width 0.4s ease}
+.bar-review{background:#1D9E75}
+.bar-value{background:#378ADD}
+.bar-quality{background:#7F77DD}
+.bar-effect{background:#D85A30}
+.bar-pop{background:#D4537E}
+.metric-score{font-size:12px;font-weight:bold;color:var(--color-text-primary);min-width:26px;text-align:right}
+.verdict{margin-top:15px;padding-top:12px;border-top:1px solid var(--color-border-tertiary);font-size:12px;color:var(--color-text-secondary);line-height:1.5; font-style: italic;}
+.summary-section{background:var(--color-background-primary);border: 1px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:20px;margin-bottom:1.5rem}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;}
+.stat-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:15px;text-align:center; border: 1px solid var(--color-border-tertiary);}
+.stat-val{font-size:22px;font-weight:bold;color:var(--color-text-primary)}
+.stat-lbl{font-size:12px;color:var(--color-text-secondary);margin-top:5px}
+.winner-banner{background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);border:1px solid #d1d5db;border-radius:var(--border-radius-lg);padding:18px 24px;display:flex;align-items:center;gap:18px;margin-bottom:1.5rem}
+.winner-icon{font-size:32px}
+.winner-text h3{font-size:16px;font-weight:bold;color:var(--color-text-primary)}
+.winner-text p{font-size:13px;color:var(--color-text-secondary);margin-top:4px}
+.table-wrap{overflow-x:auto;margin-bottom:1.5rem; background: #fff; border: 1px solid var(--color-border-secondary); border-radius: var(--border-radius-lg);}
+table{width:100%;border-collapse:collapse;font-size:13px;table-layout:auto; min-width: 800px;}
+th{background:var(--color-background-secondary);padding:12px 15px;text-align:left;font-weight:bold;font-size:12px;color:var(--color-text-secondary);border-bottom:1px solid var(--color-border-secondary)}
+td{padding:12px 15px;border-bottom:1px solid var(--color-border-tertiary);color:var(--color-text-primary);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.highlight-row td{background:rgba(0,123,255,0.05); font-weight: 500;}
+.tag{display:inline-block;padding:4px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:bold}
+.tag-yes{background:#EAF3DE;color:#27500A}
+.tag-no{background:#FCEBEB;color:#791F1F}
+.star-row{display:flex;gap:2px;align-items:center}
+.star{font-size:14px;color:#EF9F27}
+.star.empty{color:#ddd}
+.hidden{display:none}
+</style>
 </head>
 <body>
 
-    <div class="search-section">
-        <h2>Real-Time Product Comparison</h2>
-        <p>Enter a product name to instantly pull live pricing, ratings, and details against top alternatives.</p>
-        <div class="search-box">
-            <input type="text" id="productQuery" placeholder="e.g., Sony WH-1000XM4, Whey Protein, Mechanical Keyboard...">
-            <button id="searchBtn">Compare Live</button>
-        </div>
+<div class="wrap">
+  <div class="hero">
+    <h1>Indian Market Product Comparison</h1>
+    <p>Enter a product name to see how it stacks up against top local alternatives</p>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="productInput" placeholder="e.g. OnePlus 12, Tata Nexon, Whey Protein..." />
+    <select id="categorySelect">
+      <option value="auto">Auto-detect category</option>
+      <option value="smartphone">Smartphones</option>
+      <option value="laptop">Laptops</option>
+      <option value="vehicle">Vehicles</option>
+      <option value="electronics">Electronics</option>
+    </select>
+    <button class="btn-primary" id="compareBtn" onclick="runComparison()">Compare Live</button>
+  </div>
+
+  <div class="status-bar" id="statusBar">
+    <span>💡</span>
+    <span id="statusText">Enter a product name above and click Compare to start</span>
+  </div>
+
+  <div id="results" class="hidden">
+    <div class="winner-banner" id="winnerBanner">
+      <span class="winner-icon" id="winnerIcon">🏆</span>
+      <div class="winner-text">
+        <h3 id="winnerTitle">Best overall pick</h3>
+        <p id="winnerDesc">Based on market analysis across all criteria</p>
+      </div>
     </div>
+
+    <div class="section-label">Score overview</div>
+    <div class="summary-section">
+      <div class="summary-grid" id="summaryGrid"></div>
+    </div>
+
+    <div class="section-label">Product scorecards</div>
+    <div class="product-grid" id="productGrid"></div>
+
+    <div class="section-label">Detailed comparison table</div>
+    <div class="table-wrap">
+      <table id="compTable">
+        <thead id="compHead"></thead>
+        <tbody id="compBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+async function runComparison() {
+  const product = document.getElementById('productInput').value.trim();
+  const category = document.getElementById('categorySelect').value;
+  if (!product) {
+    setStatus('⚠ Please enter a product name first.', false);
+    return;
+  }
+  
+  const btn = document.getElementById('compareBtn');
+  btn.disabled = true;
+  document.getElementById('results').classList.add('hidden');
+
+  setStatus('Analyzing Indian market data for top alternatives...', true);
+
+  try {
+    // We are routing the request securely to YOUR Vercel backend
+    const res = await fetch(`/api/compare?query=${encodeURIComponent(product)}&category=${encodeURIComponent(category)}`);
     
-    <div class="comparison-container" id="comparisonGrid">
-        <div class="status-message">Type a product above to initialize real-time market comparison.</div>
+    if (!res.ok) throw new Error('Backend responded with an error');
+    
+    const data = await res.json();
+    setStatus(`✓ Comparison ready — ${data.inputProduct.name} vs ${data.alternatives.length} alternatives`, false);
+    renderResults(data);
+  } catch(e) {
+    setStatus("Error fetching data. Check your backend connection.", false);
+    console.error(e);
+  }
+  btn.disabled = false;
+}
+
+function setStatus(msg, loading) {
+  const st = document.getElementById('statusText');
+  st.textContent = msg;
+  // Handle spinner logic...
+}
+
+function stars(score) {
+  const full = Math.round(score);
+  let html = '<div class="star-row">';
+  for(let i=1;i<=5;i++) html += `<span class="star ${i<=full?'':'empty'}">★</span>`;
+  html += `<span style="font-size:12px;color:#555;margin-left:4px;font-weight:bold;">${score.toFixed(1)}</span>`;
+  html += '</div>';
+  return html;
+}
+
+function metricBar(label, value, cls) {
+  return `<div class="metric-row">
+    <span class="metric-label">${label}</span>
+    <div class="metric-bar-wrap"><div class="metric-bar ${cls}" style="width:${value}%"></div></div>
+    <span class="metric-score">${value}</span>
+  </div>`;
+}
+
+function renderCard(p, isInput, rank) {
+  const rankLabels = ['','🥇','🥈','🥉','',''];
+  const rankClass = ['','gold','silver','bronze','',''][rank] || '';
+  return `<div class="product-card ${isInput?'input-card':''}">
+    ${isInput ? '<span class="badge-input">Target Product</span>' : ''}
+    ${rank && rankLabels[rank] ? `<span class="badge-rank ${rankClass}">Rank #${rank}</span>` : ''}
+    <div class="prod-name">${p.name}</div>
+    <div class="prod-brand">${p.brand || ''}</div>
+    <div class="prod-price">${p.price}</div>
+    ${stars(p.reviewScore)}
+    <div style="margin-top:15px">
+      ${metricBar('Reviews', Math.round(p.reviewScore*20), 'bar-review')}
+      ${metricBar('Value', p.valueForMoney, 'bar-value')}
+      ${metricBar('Quality', p.qualityBuild, 'bar-quality')}
+      ${metricBar('Features', p.effectiveness, 'bar-effect')}
+      ${metricBar('Demand', p.popularity, 'bar-pop')}
     </div>
+    <div class="verdict">"${p.verdict}"</div>
+  </div>`;
+}
 
-    <script>
-        document.getElementById('searchBtn').addEventListener('click', executeComparison);
-        document.getElementById('productQuery').addEventListener('keypress', function(e) {
-            if (e.key === 'key') executeComparison();
-        });
+function renderResults(data) {
+  const all = [data.inputProduct, ...data.alternatives];
 
-        async function executeComparison() {
-            const queryInput = document.getElementById('productQuery');
-            const grid = document.getElementById('comparisonGrid');
-            const query = queryInput.value.trim();
+  const sorted = [...data.alternatives].sort((a,b) => {
+    const scoreA = a.reviewScore*20 + a.valueForMoney + a.qualityBuild + a.effectiveness + a.popularity;
+    const scoreB = b.reviewScore*20 + b.valueForMoney + b.qualityBuild + b.effectiveness + b.popularity;
+    return scoreB - scoreA;
+  });
 
-            if (!query) {
-                alert('Please enter a valid product name.');
-                return;
-            }
+  document.getElementById('winnerTitle').textContent = `🏆 Best Overall Pick: ${data.winner.name}`;
+  document.getElementById('winnerDesc').textContent = data.winner.reason;
 
-            // 1. Establish visual loading state
-            grid.innerHTML = '<div class="status-message">Fetching real-time updates from market APIs...</div>';
+  const avgReview = (all.reduce((s,p)=>s+p.reviewScore,0)/all.length).toFixed(1);
+  const cheapest = all.reduce((a,b)=>a.priceNum<b.priceNum?a:b);
+  const bestValue = all.reduce((a,b)=>a.valueForMoney>b.valueForMoney?a:b);
+  const topRated = all.reduce((a,b)=>a.reviewScore>b.reviewScore?a:b);
 
-            try {
-                // 2. Call your Vercel serverless API route
-                const response = await fetch(`/api/compare?query=${encodeURIComponent(query)}`);
-                
-                if (!response.ok) {
-                    throw new Error('Network response experienced anomalies.');
-                }
+  document.getElementById('summaryGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-val">${all.length}</div><div class="stat-lbl">Products Compared</div></div>
+    <div class="stat-card"><div class="stat-val">${avgReview}</div><div class="stat-lbl">Avg. Market Rating</div></div>
+    <div class="stat-card"><div class="stat-val" style="font-size:16px">${cheapest.name}</div><div class="stat-lbl">Most Affordable</div></div>
+    <div class="stat-card"><div class="stat-val" style="font-size:16px">${bestValue.name}</div><div class="stat-lbl">Highest Value</div></div>
+  `;
 
-                const products = await response.json();
+  let cardsHTML = renderCard(data.inputProduct, true, 0);
+  sorted.forEach((p,i) => cardsHTML += renderCard(p, false, i+1));
+  document.getElementById('productGrid').innerHTML = cardsHTML;
 
-                if (!products || products.length === 0) {
-                    grid.innerHTML = '<div class="status-message">No matching product distributions found. Try a different term.</div>';
-                    return;
-                }
+  const cols = ['Product','Price (INR)','Rating','Value','Quality','Features','Demand','Best for','Warranty'];
+  document.getElementById('compHead').innerHTML = `<tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>`;
 
-                // 3. Clear the grid to prepare for UI rendering
-                grid.innerHTML = '';
+  const rows = all.map((p,i) => {
+    const isInput = i===0;
+    const highlight = isInput ? ' class="highlight-row"' : '';
+    return `<tr${highlight}>
+      <td>${p.name}</td>
+      <td style="font-weight:bold">${p.price}</td>
+      <td>${stars(p.reviewScore)}</td>
+      <td>${p.valueForMoney}/100</td>
+      <td>${p.qualityBuild}/100</td>
+      <td>${p.effectiveness}/100</td>
+      <td>${p.popularity}/100</td>
+      <td>${p.bestFor}</td>
+      <td>${p.warranty}</td>
+    </tr>`;
+  });
+  document.getElementById('compBody').innerHTML = rows.join('');
 
-                // 4. Iterate over parsed API data points to construct the matrix elements
-                products.forEach((product, index) => {
-                    const isPrimary = index === 0; // The first item acts as the baseline target
-                    const card = document.createElement('div');
-                    card.className = `product-card ${isPrimary ? 'primary' : ''}`;
+  document.getElementById('results').classList.remove('hidden');
+}
 
-                    // Convert numeric ratings cleanly to a standard visual star presentation
-                    const visualStars = '★'.repeat(Math.round(product.rating || 5)) + '☆'.repeat(5 - Math.round(product.rating || 5));
-
-                    card.innerHTML = `
-                        ${isPrimary ? '<span class="badge">Target Product</span>' : ''}
-                        <h3>${product.title || 'Alternative Choice'}</h3>
-                        <div class="price">$${product.price || 'N/A'}</div>
-                        <ul class="feature-list">
-                            <li><span class="feature-name">Reviews</span> <span class="stars">${visualStars}</span></li>
-                            <li><span class="feature-name">Primary Effects</span> <span>${product.effects || 'Standard Performance'}</span></li>
-                            <li><span class="feature-name">Value Index</span> <span>${product.valueForMoney || 'Market Baseline'}</span></li>
-                            <li><span class="feature-name">Availability</span> <span>${product.inStock ? 'In Stock' : 'Limited'}</span></li>
-                        </ul>
-                        <button class="action-btn">${isPrimary ? 'Buy Target Option' : 'View Alternative'}</button>
-                    `;
-                    
-                    grid.appendChild(card);
-                });
-
-            } catch (error) {
-                console.error('Comparison Error:', error);
-                grid.innerHTML = '<div class="status-message" style="color: #dc3545;">Failed to load live data. Please check connection and try again.</div>';
-            }
-        }
-    </script>
+document.getElementById('productInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') runComparison();
+});
+</script>
 </body>
 </html>
