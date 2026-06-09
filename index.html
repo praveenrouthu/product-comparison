@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Live Product Comparison Dashboard</title>
 <style>
-/* Keeping your exact CSS styling */
 :root {
   --color-text-primary: #111;
   --color-text-secondary: #555;
@@ -102,7 +101,7 @@ tr.highlight-row td{background:rgba(0,123,255,0.05); font-weight: 500;}
   </div>
 
   <div class="status-bar" id="statusBar">
-    <span>💡</span>
+    <span id="statusIcon">💡</span>
     <span id="statusText">Enter a product name above and click Compare to start</span>
   </div>
 
@@ -149,25 +148,46 @@ async function runComparison() {
   setStatus('Analyzing Indian market data for top alternatives...', true);
 
   try {
-    // We are routing the request securely to YOUR Vercel backend
     const res = await fetch(`/api/compare?query=${encodeURIComponent(product)}&category=${encodeURIComponent(category)}`);
     
-    if (!res.ok) throw new Error('Backend responded with an error');
+    if (!res.ok) throw new Error('Backend responded with a network error');
     
     const data = await res.json();
+    
+    // Gracefully handle server-side errors passed down from Gemini API configurations
+    if (data.error) {
+      setStatus(`⚠ ${data.message}`, false);
+      btn.disabled = false;
+      return;
+    }
+    
     setStatus(`✓ Comparison ready — ${data.inputProduct.name} vs ${data.alternatives.length} alternatives`, false);
     renderResults(data);
   } catch(e) {
-    setStatus("Error fetching data. Check your backend connection.", false);
+    setStatus("Error fetching data. Check your backend connection or logs.", false);
     console.error(e);
   }
   btn.disabled = false;
 }
 
 function setStatus(msg, loading) {
+  const sb = document.getElementById('statusBar');
   const st = document.getElementById('statusText');
+  const si = document.getElementById('statusIcon');
   st.textContent = msg;
-  // Handle spinner logic...
+  
+  // Clear any existing active spinner element
+  const existingSpinner = sb.querySelector('.spinner');
+  if (existingSpinner) existingSpinner.remove();
+  
+  if (loading) {
+    si.style.display = 'none';
+    const sp = document.createElement('div');
+    sp.className = 'spinner';
+    sb.insertBefore(sp, sb.firstChild);
+  } else {
+    si.style.display = 'inline';
+  }
 }
 
 function stars(score) {
@@ -223,13 +243,12 @@ function renderResults(data) {
   const avgReview = (all.reduce((s,p)=>s+p.reviewScore,0)/all.length).toFixed(1);
   const cheapest = all.reduce((a,b)=>a.priceNum<b.priceNum?a:b);
   const bestValue = all.reduce((a,b)=>a.valueForMoney>b.valueForMoney?a:b);
-  const topRated = all.reduce((a,b)=>a.reviewScore>b.reviewScore?a:b);
 
   document.getElementById('summaryGrid').innerHTML = `
     <div class="stat-card"><div class="stat-val">${all.length}</div><div class="stat-lbl">Products Compared</div></div>
     <div class="stat-card"><div class="stat-val">${avgReview}</div><div class="stat-lbl">Avg. Market Rating</div></div>
-    <div class="stat-card"><div class="stat-val" style="font-size:16px">${cheapest.name}</div><div class="stat-lbl">Most Affordable</div></div>
-    <div class="stat-card"><div class="stat-val" style="font-size:16px">${bestValue.name}</div><div class="stat-lbl">Highest Value</div></div>
+    <div class="stat-card"><div class="stat-val" style="font-size:14px">${cheapest.name}</div><div class="stat-lbl">Most Affordable</div></div>
+    <div class="stat-card"><div class="stat-val" style="font-size:14px">${bestValue.name}</div><div class="stat-lbl">Highest Value</div></div>
   `;
 
   let cardsHTML = renderCard(data.inputProduct, true, 0);
