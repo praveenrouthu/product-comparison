@@ -73,12 +73,13 @@ export default async function handler(req, res) {
         Note: Generate exactly 4 items in the alternatives array so the UI renders exactly 5 items total. Avoid markdown wrappers.
         `;
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+        // FIXED: Switched endpoint to use the correct v1/models stable structure
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                tools: [{ google_search: {} }], // <-- FIXED: Changed to snake_case for direct REST calls
+                tools: [{ google_search: {} }], 
                 generationConfig: { 
                     response_mime_type: "application/json"
                 } 
